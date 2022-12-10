@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 # app=Flask(__name__)
 # #load the model
-knnmodel=pickle.load(open('knnmodel.pkl', 'rb'))
+pickled_model = pickle.load(open('knnmodel.pkl', 'rb'))
 # scaler=pickle.load(open('scaling.pkl', 'rb'))
 
 # @app.route('/')
@@ -58,6 +58,8 @@ def man():
 
 @app.route('/predict', methods=["POST"])
 def home():
+    pickled_model = pickle.load(open('knnmodel.pkl', 'rb'))
+
     Pregnancies = request.form['a']
     Glucose = request.form['b']
     BloodPressure = request.form['c']
@@ -67,8 +69,15 @@ def home():
     DiabetesPedigreeFunction = request.form['g']
     Age = request.form['h']
     
-    arr = np.array([[Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age ]])
-    prediction = knnmodel.predict(arr)
+    # arr = np.array([[Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age ]])
+    # prediction = knnmodel.predict(arr)
+    predict_example = (Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age)    
+    input_data_as_numpy_array = np.asarray(predict_example)
+    input_data_reshape = input_data_as_numpy_array.reshape(1, -1)
+    std_data = scaler.transform(input_data_reshape)
+    prediction = knn.predict(std_data)
+
+
 
     return render_template('prediction_result.html', data=prediction)
 
